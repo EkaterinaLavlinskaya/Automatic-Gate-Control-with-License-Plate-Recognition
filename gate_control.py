@@ -1,20 +1,31 @@
 import serial
 import time
 
-# Подключение к Arduino (порт может отличаться)
-# В Arduino IDE: Инструменты → Порт → посмотри, какой порт выбран
-arduino = serial.Serial('COM3', 9600)   # на Windows
-# arduino = serial.Serial('/dev/ttyACM0', 9600)  # на Linux / Mac
-time.sleep(2)   # ждём, пока Arduino инициализируется
+arduino = serial.Serial('COM4', 9600)   # замени на свой порт
+time.sleep(2)                           # ждём инициализации
 
-# Отправляем команду на включение светодиода
+# Открыть ворота (зажечь светодиод)
 arduino.write(b'1')
-print("Светодиод включён")
+time.sleep(2)
 
-time.sleep(3)   # светодиод горит 3 секунды
-
-# Отправляем команду на выключение
+# Закрыть ворота (погасить)
 arduino.write(b'0')
-print("Светодиод выключен")
-
 arduino.close()
+
+import cv2
+import easyocr
+
+reader = easyocr.Reader(['ru', 'en'])
+img = cv2.imread('car_with_plate.jpg')
+plate = img[100:200, 150:350]   # подбери координаты под своё фото
+result = reader.readtext(plate)
+print(result)   # [([[x1,y1,x2,y2]], 'A123BC', confidence)]
+
+allowed_plates = ['A123BC', 'B456DE']
+
+recognized_text = result[0][1]   # текст номера
+
+if recognized_text in allowed_plates:
+    arduino.write(b'1')          # открываем ворота
+else:
+    print("Номер не в списке")
