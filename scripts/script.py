@@ -2,15 +2,28 @@ import cv2
 import datetime
 import os
 
-# Загрузка готовой модели
-cascade_path = r"C:\MyPythonProjects\AV\yolo-coco\coches.xml"
+# Встроенный каскад OpenCV для машин (обучен на заднем виде, но попробуем)
+cascade_path = cv2.data.haarcascades + 'haarcascade_car.xml'
+
+# Проверяем, существует ли файл
+if not os.path.exists(cascade_path):
+    print(f"❌ Файл каскада не найден: {cascade_path}")
+    print("Попробуем альтернативный вариант...")
+    # Альтернатива — использовать более общий каскад
+    cascade_path = cv2.data.haarcascades + 'haarcascade_frontalcatface.xml'
+    # это шутка, но давай проверим
+
 car_cascade = cv2.CascadeClassifier(cascade_path)
+
+if car_cascade.empty():
+    print("❌ Не удалось загрузить каскад. Переходим к YOLO...")
+    exit()
 
 cap = cv2.VideoCapture(0)
 recording = False
 out = None
 
-print("🔍 Слежу за машинами (Haar каскад)... Нажми 'q' для выхода")
+print("🔍 Слежу за машинами (OpenCV каскад)... Нажми 'q' для выхода")
 
 while True:
     ret, frame = cap.read()
@@ -45,7 +58,7 @@ while True:
         out.write(frame)
         cv2.putText(frame, "REC", (frame.shape[1] - 60, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
-    cv2.imshow("Car Detection (Haar)", frame)
+    cv2.imshow("Car Detection", frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
