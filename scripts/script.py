@@ -29,7 +29,6 @@ if not cap.isOpened():
 
 recording = False
 out = None
-no_car_counter = 0  # счетчик кадров без машины
 MIN_CAR_FRAMES = 3  # сколько кадров подряд должна быть машина для старта записи
 car_detection_history = []  # история обнаружений
 
@@ -57,21 +56,21 @@ while True:
             class_id = np.argmax(scores)
             confidence = scores[class_id]
 
-           if confidence > CONFIDENCE_THRESHOLD and class_id in TARGET_IDS:
-    # Дополнительная проверка на размер
-               box_width = detection[2] * width
-               box_height = detection[3] * height
-               if box_width > 100 and box_height > 100:  # машина должна быть не меньше 100x100 пикселей
-                   car_detected = True
-                if confidence > best_confidence:
-                    best_confidence = confidence
-                    center_x = int(detection[0] * width)
-                    center_y = int(detection[1] * height)
-                    w = int(detection[2] * width)
-                    h = int(detection[3] * height)
-                    x = center_x - w // 2
-                    y = center_y - h // 2
-                    best_box = (x, y, w, h)
+            if confidence > CONFIDENCE_THRESHOLD and class_id in TARGET_IDS:
+                # Дополнительная проверка на размер
+                box_width = detection[2] * width
+                box_height = detection[3] * height
+                if box_width > 100 and box_height > 100:  # машина должна быть не меньше 100x100 пикселей
+                    car_detected = True
+                    if confidence > best_confidence:
+                        best_confidence = confidence
+                        center_x = int(detection[0] * width)
+                        center_y = int(detection[1] * height)
+                        w = int(detection[2] * width)
+                        h = int(detection[3] * height)
+                        x = center_x - w // 2
+                        y = center_y - h // 2
+                        best_box = (x, y, w, h)
 
     # Рисуем рамку, если есть
     if best_box:
