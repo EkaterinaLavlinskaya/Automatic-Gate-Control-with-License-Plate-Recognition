@@ -2,28 +2,28 @@ import cv2
 import datetime
 import os
 
-# Встроенный каскад OpenCV для машин (обучен на заднем виде, но попробуем)
-cascade_path = cv2.data.haarcascades + 'haarcascade_car.xml'
+# Путь к скачанному файлу каскада для номеров
+cascade_path = r"C:\MyPythonProjects\AV\yolo-coco\haarcascade_russian_plate_number.xml"
 
 # Проверяем, существует ли файл
 if not os.path.exists(cascade_path):
     print(f"❌ Файл каскада не найден: {cascade_path}")
-    print("Попробуем альтернативный вариант...")
-    # Альтернатива — использовать более общий каскад
-    cascade_path = cv2.data.haarcascades + 'haarcascade_frontalcatface.xml'
-    # это шутка, но давай проверим
-
-car_cascade = cv2.CascadeClassifier(cascade_path)
-
-if car_cascade.empty():
-    print("❌ Не удалось загрузить каскад. Переходим к YOLO...")
     exit()
+
+# Загружаем каскад
+plate_cascade = cv2.CascadeClassifier(cascade_path)
+
+if plate_cascade.empty():
+    print("❌ Не удалось загрузить каскад. Проверь файл.")
+    exit()
+
+print("✅ Каскад для номеров загружен!")
 
 cap = cv2.VideoCapture(0)
 recording = False
 out = None
 
-print("🔍 Слежу за машинами (OpenCV каскад)... Нажми 'q' для выхода")
+print("🔍 Слежу за номерами... Нажми 'q' для выхода")
 
 while True:
     ret, frame = cap.read()
@@ -31,23 +31,31 @@ while True:
         break
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    cars = car_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+    
+    # Детекция номеров
+    plates = plate_cascade.detectMultiScale(
+        gray,
+        scaleFactor=1.1,
+        minNeighbors=5,
+        minSize=(30, 30)
+    )
 
-    car_detected = len(cars) > 0
+    plate_detected = len(plates) > 0
 
-    # Рисуем рамки
-    for (x, y, w, h) in cars:
+    # Рисуем рамки вокруг номеров
+    for (x, y, w, h) in plates:
         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        cv2.putText(frame, "PLATE", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-    # Запись при обнаружении
-    if car_detected:
+    # Запись при обнаружении номера
+    if plate_detected:
         if not recording:
-            filename = f"C:/Users/Денис/Downloads/car_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.avi"
+            filename = f"C:/Users/Денис/Downloads/plate_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.avi"
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
             h, w = frame.shape[:2]
             out = cv2.VideoWriter(filename, fourcc, 20.0, (w, h))
             recording = True
-            print(f"🎬 МАШИНА! Запись: {filename}")
+            print(f"🎬 НОМЕР! Запись: {filename}")
     else:
         if recording:
             recording = False
@@ -58,7 +66,7 @@ while True:
         out.write(frame)
         cv2.putText(frame, "REC", (frame.shape[1] - 60, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
-    cv2.imshow("Car Detection", frame)
+    cv2.imshow("Number Plate Detection", frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
