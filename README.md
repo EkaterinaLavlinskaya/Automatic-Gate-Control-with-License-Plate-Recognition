@@ -27,25 +27,27 @@
 ---
 
 ## 📁 Структура проекта
-smart-gate/
-├── gate_control/ # Управление воротами
-│ └── controller.py
-├── camera/ # Работа с камерой и видео
-│ └── recorder.py
-├── scripts/ # Готовые скрипты для запуска
-│ ├── open_gate.py # Открыть ворота
-│ ├── record_video.py # Запись видео с таймстампом
-│ ├── motion_detection.py # Запись только при движении
-│ └── record_on_car.py # Запись только при обнаружении машины
-├── yolo-coco/ # Файлы YOLO (веса, конфиг, классы)
-│ ├── yolov3.weights
-│ ├── yolov3.cfg
-│ └── coco.names
-├── dataset/ # Мой датасет для дообучения
-│ ├── images/
-│ └── labels/
-├── README.md
-└── requirements.txt
+automatic-gate/
+├── src/
+│   ├── camera.py              # скрипт для камеры + детекция движения
+│   ├── detection.py           # инференс YOLO на ноутбуке
+│   ├── arduino.py             # команды на Arduino / реле
+│   └── pipeline.py            # основной пайплайн
+├── data/
+│   ├── dataset/               # твои 45 фото (или ссылка, если тяжелые)
+│   ├── annotations/           # 45 txt-файлов от LabelImg
+│   └── README.md              # как собирала данные, условия съемки
+├── models/
+│   └── yolov3_custom.weights  # твоя дообученная модель (или ссылка)
+├── notebooks/
+│   └── training.ipynb         # ноутбук с дообучением в Colab
+├── config/
+│   └── thresholds.yaml        # пороги, размер кадров и т.д.
+├── docker-compose.yml         # опционально
+├── requirements.txt
+├── README.md                  # главный файл (см. ниже)
+├── demo.mp4                   # видео работы системы
+└── .gitignore
 
 text
 
