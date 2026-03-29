@@ -12,7 +12,7 @@ print(f"Рабочая папка: {os.getcwd()}")
 
 class PlateReader:
     def __init__(self):
-        self.model = YOLO("yolov8n.pt")
+        self.model = YOLO("best.pt")  # моя дообученная модель
         self.reader = easyocr.Reader(['ru', 'en'], gpu=False)
         
         # Создаём папку data и файл с базой, если их нет
